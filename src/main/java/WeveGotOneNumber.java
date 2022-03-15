@@ -6,12 +6,13 @@ import java.util.stream.Collectors;
 public class WeveGotOneNumber {
 
     private final static Map<Integer, String> map = new TreeMap<>();
+    private final static Map<Long, String> mapExpanded = new TreeMap<>();
     private final static Set<Integer> list = new TreeSet<>();
     private final static Map<Integer, Integer> maxMap = new HashMap<>();
 
 
     public static void main(String[] args) throws FileNotFoundException {
-        newFaster(4, 1000000);
+        newExpanded(5, 1000000);
         System.out.println("size = " + NumberPathNew.f.factorials.size());
     }
 
@@ -24,7 +25,7 @@ public class WeveGotOneNumber {
             while (true) {
                 NumberPathNewer min = listPaths.get(listPaths.size() - 1);
                 if (min.thisValue() == null){
-                    min.nextValueIfUnder(Integer.MAX_VALUE);
+                    min.nextValue();
                 }
                 for (NumberPathNewer listPath : listPaths) {
                     if (listPath.thisValue() != null) {
@@ -65,7 +66,7 @@ public class WeveGotOneNumber {
                 }
                 listPaths.remove(min);
                 listPaths.add(min);
-                min.nextValueIfUnder(Integer.MAX_VALUE);
+                min.nextValue();
             }
         } catch (Exception ignored){
             ignored.printStackTrace();;
@@ -74,13 +75,72 @@ public class WeveGotOneNumber {
         //pw.close();
         System.out.println(System.currentTimeMillis() - temp1);
     }
+    
+    public static void newExpanded(int start, int end) throws FileNotFoundException {
+        PrintWriter pw = new PrintWriter("numbers.out");
+        long temp1 = System.currentTimeMillis();
+        try {
+            for (; start <= end; start++) {
+                System.out.println(start);
+                if (list.contains(start))
+                    continue;
+                List<NumberPathExpanded> listPaths = new ArrayList<>();
+                listPaths.add(new NumberPathExpanded(new ChildedIntExpanded((long) start, null, 0, true)));
+                while (true) {
+                    NumberPathExpanded min = listPaths.get(listPaths.size() - 1);
+                    if (min.thisValue() == null){
+                        min.nextValue();
+                    }
+                    for (NumberPathExpanded listPath : listPaths) {
+                        if (listPath.thisValue() != null) {
+                            if (listPath.thisValue().getValue() < min.thisValue().getValue()) {
+                                min = listPath;
+                            }
+                        } else if (listPath.nextValueIfUnder(min.thisValue().getValue())) {
+                            min = listPath;
+                        }
+                    }
+                    ChildedIntExpanded temp = min.thisValue();
+                    if (temp.getValue() < start || mapExpanded.containsKey(temp.getValue())) {
+                        Map<Long, NumberPathExpanded> pathMap = listPaths.stream().collect(Collectors.toMap(x -> x.getValue().getValue(), x -> x));
+                        //int steps = (temp.getValue() >= 7 ? maxMap.get(temp.getValue()) : 0);
+                        while (temp.getChild() != null) {
+                            String s = "";
+                            s += temp.getChild() + ": ";
+                            s += ((temp.getValue() == null) ? "Known value" : temp.toString());
+                            //pw.println(s);
+                            //System.out.println(s);
+                            mapExpanded.put(temp.getChild(), s);
+                            //maxMap.put(temp.getChild(), ++steps);
+                            temp = pathMap.get(temp.getChild()).getValue();
+                        }
+                        pathMap.clear();
+                        break;
+                    }
+                    if (!temp.getValue().equals(min.getValue().getValue()) && !listPaths.stream().collect(Collectors.toMap(x -> x.getValue().getValue(), x -> x)).containsKey(temp.getValue())) {
+                        listPaths.add(new NumberPathExpanded(temp));
+                    }
+                    listPaths.remove(min);
+                    listPaths.add(min);
+                    min.nextValue();
+                }
+            }
+        } catch (Exception ignored){
+            ignored.printStackTrace();;
+        }
+        map.values().forEach(pw::println);
+        pw.close();
+        System.out.println(System.currentTimeMillis() - temp1);
+        //int max = Collections.max(maxMap.values());
+        //maxMap.entrySet().stream().filter(e -> e.getValue() == max).forEach(System.out::println);
+    }
 
     public static void newFaster(int start, int end) throws FileNotFoundException {
         PrintWriter pw = new PrintWriter("numbers.out");
         long temp1 = System.currentTimeMillis();
         try {
             for (; start <= end; start++) {
-                //System.out.println(start);
+                System.out.println(start);
                 if (list.contains(start))
                     continue;
                 List<NumberPathNewer> listPaths = new ArrayList<>();
@@ -88,7 +148,7 @@ public class WeveGotOneNumber {
                 while (true) {
                     NumberPathNewer min = listPaths.get(listPaths.size() - 1);
                     if (min.thisValue() == null){
-                        min.nextValueIfUnder(Integer.MAX_VALUE);
+                        min.nextValue();
                     }
                     for (NumberPathNewer listPath : listPaths) {
                         if (listPath.thisValue() != null) {
@@ -122,7 +182,7 @@ public class WeveGotOneNumber {
                     }
                     listPaths.remove(min);
                     listPaths.add(min);
-                    min.nextValueIfUnder(Integer.MAX_VALUE);
+                    min.nextValue();
                 }
             }
         } catch (Exception ignored){

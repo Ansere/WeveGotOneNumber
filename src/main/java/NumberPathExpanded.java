@@ -1,6 +1,6 @@
-public class NumberPathNewer implements Comparable<NumberPathNewer>{
-    private ChildedInt value;
-    private Integer curInt;
+public class NumberPathExpanded implements Comparable<NumberPathExpanded>{
+    private ChildedIntExpanded value;
+    private long curInt;
     private double lowerBound;
     private double upperBound;
     private double exact;
@@ -9,7 +9,7 @@ public class NumberPathNewer implements Comparable<NumberPathNewer>{
     private boolean isFloor;
     public static Factorializer f = new Factorializer();
 
-    public NumberPathNewer(ChildedInt value){
+    public NumberPathExpanded(ChildedIntExpanded value){
         this.value = value;
         lowerBound = Math.log(value.getValue() - 1);
         upperBound = Math.log(value.getValue() + 1);
@@ -18,15 +18,15 @@ public class NumberPathNewer implements Comparable<NumberPathNewer>{
         curInt = 1;
     }
 
-    public ChildedInt getValue(){
+    public ChildedIntExpanded getValue(){
         return value;
     }
 
-    public ChildedInt thisValue(){
+    public ChildedIntExpanded thisValue(){
         if (numRoots <= -1){
             return null;
         }
-        return new ChildedInt(curInt, value.getValue(), numRoots, isFloor);
+        return new ChildedIntExpanded(curInt, value.getValue(), numRoots, isFloor);
     }
 
     public int getNumRoots(){
@@ -34,8 +34,8 @@ public class NumberPathNewer implements Comparable<NumberPathNewer>{
     }
 
     public void nextValue(){
-        int j = Math.max(curInt, lowerFact(lowerBound));
-        int i = j;
+        long j = Math.max(curInt, lowerFact(lowerBound));
+        long i = j;
         double factorial = 0;
         for (; (lowerBound >= factorial || i < j + 1); i++){
             factorial = getFact(i + 1);
@@ -57,10 +57,9 @@ public class NumberPathNewer implements Comparable<NumberPathNewer>{
         isFloor = exact < factorial;
     }
 
-
-    public boolean nextValueIfUnder(Integer integer){
-        int j = Math.max(curInt, lowerFact(lowerBound));
-        int i = j;
+    public boolean nextValueIfUnder(Long integer){
+        long j = Math.max(curInt, lowerFact(lowerBound));
+        long i = j;
         if (i > integer){
             return false;
         }
@@ -99,8 +98,8 @@ public class NumberPathNewer implements Comparable<NumberPathNewer>{
     }
 
     @Override
-    public int compareTo(NumberPathNewer o) {
-        int comp = this.curInt.compareTo(o.curInt);
+    public int compareTo(NumberPathExpanded o) {
+        int comp = Long.compare(curInt, o.curInt);
         if (comp == 0)
             return this.value.getValue().compareTo(o.value.getValue());
         else
