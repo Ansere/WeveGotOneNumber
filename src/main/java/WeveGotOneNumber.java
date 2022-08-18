@@ -1,4 +1,7 @@
+import org.apache.batik.transcoder.TranscoderException;
+
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -11,8 +14,9 @@ public class WeveGotOneNumber {
     private final static Map<Integer, Integer> maxMap = new HashMap<>();
 
 
-    public static void main(String[] args) throws FileNotFoundException {
-        newExpanded(5, 1000000);
+    public static void main(String[] args) throws IOException, TranscoderException {
+        String s = "";
+        Convert.toSVG("$$ " + s + " $$", "test.svg", true);
         System.out.println("size = " + NumberPathNew.f.factorials.size());
     }
 
