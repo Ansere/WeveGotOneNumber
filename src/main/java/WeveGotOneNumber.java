@@ -1,8 +1,11 @@
 import org.apache.batik.transcoder.TranscoderException;
 
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -11,14 +14,41 @@ public class WeveGotOneNumber {
     private final static Map<Integer, String> map = new TreeMap<>();
     private final static Map<Long, String> mapExpanded = new TreeMap<>();
     private final static Set<Integer> list = new TreeSet<>();
+    private final static Set<Long> longList = new TreeSet<>();
     private final static Map<Integer, Integer> maxMap = new HashMap<>();
 
 
     public static void main(String[] args) throws IOException, TranscoderException {
         String s = "";
         Convert.toSVG("$$ " + s + " $$", "test.svg", true);
-        System.out.println("size = " + NumberPathNew.f.factorials.size());
+        PrintWriter pw = new PrintWriter(new FileOutputStream("data/total_1000000.txt", false));
+        Files.readAllLines(Path.of("data/total.txt")).forEach(e -> {
+            Long number = Long.parseLong(e.split(": ")[0]);
+            String[] data = e.split(": ")[1].split("\\^");
+            Long startingNum = Long.parseLong(data[0].replace("floor", "").replace("ceil", "").replace("(", "").replace(")", "").replace("!", ""));
+            long exp = Math.round(Math.log(NumberPathExpanded.getFact(startingNum)/Math.log(number))/Math.log(2));
+            if (exp < 31) {
+                pw.println(e);
+            } else {
+                pw.println(number + ": " + (e.contains("ceil") ? "ceil" : "floor") + "((1/" + startingNum + ")^(" + (1L << exp) + "))");
+            }
+        });
+        pw.close();
+        /*
+        initNumbers("data/total.txt", 625000);
+        newExpanded(625001, 1000000);
+
+         */
     }
+
+    private static void initNumbers(String fileName, long until) throws IOException {
+        Files.readAllLines(Path.of(fileName)).stream().skip(until).forEach(x -> {
+            String[] data = x.split(": ");
+            longList.add(Long.parseLong(data[0]));
+        });
+    }
+
+
 
     public static void individual(int num){
         //PrintWriter pw = new PrintWriter("numbers.out");
@@ -28,6 +58,7 @@ public class WeveGotOneNumber {
             listPaths.add(new NumberPathNewer(new ChildedInt(num, null, 0, true)));
             while (true) {
                 NumberPathNewer min = listPaths.get(listPaths.size() - 1);
+                System.out.println(min);
                 if (min.thisValue() == null){
                     min.nextValue();
                 }
@@ -80,13 +111,19 @@ public class WeveGotOneNumber {
         System.out.println(System.currentTimeMillis() - temp1);
     }
     
-    public static void newExpanded(int start, int end) throws FileNotFoundException {
-        PrintWriter pw = new PrintWriter("numbers.out");
+    public static void newExpanded(int start, int end) throws IOException {
+        Files.readAllLines(Path.of("data\\total.txt")).forEach(e -> {
+            String[] data = e.split(": ");
+            mapExpanded.put(Long.valueOf(data[0]), e);
+        });
+        PrintWriter pw = new PrintWriter(new FileOutputStream("data/total.txt", false));
         long temp1 = System.currentTimeMillis();
         try {
+            int initStart = start;
             for (; start <= end; start++) {
-                System.out.println(start);
-                if (list.contains(start))
+                if (start % Math.ceil((end-initStart)/100.) == 0)
+                    System.out.println(start);
+                if (longList.contains((long) start))
                     continue;
                 List<NumberPathExpanded> listPaths = new ArrayList<>();
                 listPaths.add(new NumberPathExpanded(new ChildedIntExpanded((long) start, null, 0, true)));
@@ -105,7 +142,7 @@ public class WeveGotOneNumber {
                         }
                     }
                     ChildedIntExpanded temp = min.thisValue();
-                    if (temp.getValue() < start || mapExpanded.containsKey(temp.getValue())) {
+                    if (temp.getValue() < start || mapExpanded.containsKey(temp.getValue()) || longList.contains(temp.getValue())) {
                         Map<Long, NumberPathExpanded> pathMap = listPaths.stream().collect(Collectors.toMap(x -> x.getValue().getValue(), x -> x));
                         //int steps = (temp.getValue() >= 7 ? maxMap.get(temp.getValue()) : 0);
                         while (temp.getChild() != null) {
@@ -116,6 +153,14 @@ public class WeveGotOneNumber {
                             //System.out.println(s);
                             mapExpanded.put(temp.getChild(), s);
                             //maxMap.put(temp.getChild(), ++steps);
+                            if (temp.getValue() == null) {
+                                break;
+                            }
+                            if (temp.isFloor()) {
+                                mapExpanded.putIfAbsent(temp.getChild() + 1, temp.getChild() + 1 + ": " +ChildedIntExpanded.formatString(temp.getValue(), temp.getNumRoots(), false));
+                            } else {
+                                mapExpanded.putIfAbsent(temp.getChild() - 1, temp.getChild() - 1 + ": " + ChildedIntExpanded.formatString(temp.getValue(), temp.getNumRoots(), true));
+                            }
                             temp = pathMap.get(temp.getChild()).getValue();
                         }
                         pathMap.clear();
@@ -132,7 +177,7 @@ public class WeveGotOneNumber {
         } catch (Exception ignored){
             ignored.printStackTrace();;
         }
-        map.values().forEach(pw::println);
+        mapExpanded.values().forEach(pw::println);
         pw.close();
         System.out.println(System.currentTimeMillis() - temp1);
         //int max = Collections.max(maxMap.values());

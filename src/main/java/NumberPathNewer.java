@@ -39,6 +39,7 @@ public class NumberPathNewer implements Comparable<NumberPathNewer>{
         double factorial = 0;
         for (; (lowerBound >= factorial || i < j + 1); i++){
             factorial = getFact(i + 1);
+            System.out.println(lowerBound);
             if (upperBound - factorial < 0.000001){
                 lowerBound *= 2;
                 upperBound *= 2;

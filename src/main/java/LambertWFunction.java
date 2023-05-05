@@ -20,17 +20,18 @@ public class LambertWFunction {
     public static double normalFunction(double x) {
         //This is the regular function which Lambert W is the inverse of.
         //It is just f(x) = x*e^x
-        return x * (Math.pow(Math.E, x));
+        return x * (Math.exp(x));
     }
 
     public static double derivativeOfFunction(double x) {
         //This is the derivative of the function in the previous method
         //f(x) = (x+1)*e^x
-        return (x + 1) * Math.pow(Math.E, x);
+        return (x + 1) * Math.exp(x);
     }
 
     public static double W(double x) {
         //This is the method which finds the W
+        int iter = 0;
         double b;
         if (x < 0)
             b = x * Math.exp(1 - Math.sqrt(2 * (Math.E * x + 1)));
@@ -43,6 +44,10 @@ public class LambertWFunction {
             //Checks whether we are getting an incorrect value and continues the loop if yes
             b -= (normalFunction(b) - x) / derivativeOfFunction(b);//System.out.println((b));
             //Newton iteration trying to get the closer value
+            iter++;
+            if (iter > 1000) {
+                return b;
+            }
         }
         return b;
     }

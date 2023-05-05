@@ -45,6 +45,10 @@ public class ChildedIntExpanded {
     }
 
     public String toString(){
-        return (isFloor ? "floor" : "ceil") + "((" + value + "!)^"+ "(1/" + (int) Math.pow(2, numRoots) + "))";
+        return (isFloor ? "floor" : "ceil") + "((" + value + "!)^"+ "(1/" + (1 << numRoots) + "))";
+    }
+
+    public static String formatString(long value, long numRoots, boolean isFloor) {
+        return (isFloor ? "floor" : "ceil") + "((" + value + "!)^"+ "(1/" + (1L << numRoots) + "))";
     }
 }

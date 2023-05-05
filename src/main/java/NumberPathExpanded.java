@@ -39,7 +39,7 @@ public class NumberPathExpanded implements Comparable<NumberPathExpanded>{
         double factorial = 0;
         for (; (lowerBound >= factorial || i < j + 1); i++){
             factorial = getFact(i + 1);
-            if (upperBound - factorial < 0.000001){
+            if (upperBound - factorial < 0.00001){
                 lowerBound *= 2;
                 upperBound *= 2;
                 exact *= 2;
@@ -88,12 +88,12 @@ public class NumberPathExpanded implements Comparable<NumberPathExpanded>{
         return true;
     }
 
-    public static int lowerFact(double lowerBound){
-        return (int) Math.floor(Math.pow(Math.E, LambertWFunction.W((lowerBound - Math.log(Math.sqrt(2 * Math.PI)))/Math.E) + 1) - 1/2.);
+    public static long lowerFact(double lowerBound){
+        return (long) Math.floor(Math.exp(LambertWFunction.W((lowerBound - 0.918938533205)/Math.E) + 1) - 1/2.);
     }
 
     public static double getFact(double i){
-        double v = i * Math.log(i) - i + Math.log(i * (1 + 4 * i * (1 + 2 * i))) / 6. + Math.log(Math.PI) / 2;
+        double v = i * Math.log(i) - i + Math.log(i * (1 + 4 * i * (1 + 2 * i))) / 6. + 0.57236494;
         return v;
     }
 
